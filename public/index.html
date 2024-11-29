@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="jgfavicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+      integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="socket.io/socket.io.js"></script>
+    <title>Social Media Links Card</title>
+  </head>
+  <body>
+    <div class="app">
+      <!-- USER PROFILE IMG -->
+      <div class="social-media-card">
+        <div class="social-media-main-content">
+          <div class="user-profile-img-div">
+            <div class="profile-img-skeleton-loader skeleton-loader"></div>
+          </div>
+
+          <div class="username-location-container">
+            <!-- USERNAME ROW -->
+            <div class="username-row">
+              <div id="firstname" class="username-div">
+                <div class="username-skeleton-loader skeleton-loader"></div>
+              </div>
+              <div id="lastname" class="username-div">
+                <div class="username-skeleton-loader skeleton-loader"></div>
+              </div>
+            </div>
+            <!-- LOCATION ROW-->
+            <div class="location-row">
+              <div id="city" class="location-div">
+                <div class="city-skeleton-loader skeleton-loader"></div>
+              </div>
+              <div id="country" class="location-div">
+                <div class="country-skeleton-loader skeleton-loader"></div>
+              </div>
+            </div>
+          </div>
+          <!-- QUOTE -->
+          <div id="quote" class="quote-div">
+            <div class="quote-skeleton-loader skeleton-loader"></div>
+          </div>
+          <div class="buttons-list">
+            <div class="skeleton-loader"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let icons = [
+        { id: 1, name: "github", icon: "fab fa-github" },
+        { id: 2, name: "frontendmentor", icon: "fa fa-laptop" },
+        { id: 3, name: "codepen", icon: "fab fa-codepen" },
+        { id: 4, name: "portfolio", icon: "fa fa-star" },
+        { id: 5, name: "instagram", icon: "fab fa-instagram" },
+      ];
+      let socket = io();
+      let FILE_SIZE = 0;
+
+      setTimeout(() => socket.emit("client-data"), 2500);
+
+      socket.on("image-size", (imgSize) => {
+        console.log("ImageSize", imgSize);
+        FILE_SIZE = imgSize;
+      });
+
+      let imgChunks = [];
+      let flatBytes;
+      // let byteCounter = 0;
+      socket.on("img-data", ({ chunks, len }) => {
+        // console.log(chunks);
+        chunks = new Int8Array(chunks);
+        // byteCounter += chunks.length;
+        imgChunks.push(chunks);
+        flatBytes = new Int8Array(FILE_SIZE);
+        let offset = 0;
+        imgChunks.forEach((chunk) => {
+          flatBytes.set(chunk, offset);
+          offset += chunk.length;
+        });
+
+        if (offset == FILE_SIZE) {
+          console.log("file has successfully transmitted");
+          handleCreateImage(flatBytes);
+        }
+
+        // imgChunks.push(chunks);
+        // byteCounter += len;
+        // console.log(byteCounter, FILE_SIZE);
+        // if (byteCounter == FILE_SIZE) {
+        //   flattenBytes(imgChunks);
+        // }
+      });
+
+      function handleCreateImage(int8Data) {
+        let blob = new Blob([int8Data], { type: "imgage/jpeg" });
+        let url = URL.createObjectURL(blob);
+
+        let img = new Image();
+        img.src = url;
+        img.className = "profile-img";
+        console.log("handlecreate image!");
+        document.querySelector(".user-profile-img-div").innerHTML = "";
+        document.querySelector(".user-profile-img-div").appendChild(img);
+      }
+
+      // function flattenBytes(imgChunks) {
+      //   console.log("FlattenBYTES - imgChunks", imgChunks);
+      //   Array.from(imgChunks).forEach((chunkBuffer) => {
+      //     console.log(chunkBuffer.length);
+      //   });
+      //   console.log(flatBytes);
+      // }
+
+      socket.on("data", (payload) => {
+        handleRender(payload);
+      });
+
+      function handleRender(payload) {
+        let key = Object.keys(payload)[0];
+        let value = Object.values(payload)[0];
+        // console.log(key, value);
+        let idx = icons.findIndex((item) => item.name == key);
+        if (idx != -1) {
+          // console.log("handle link!");
+          printButton(key, value, idx);
+        } else {
+          // console.log("handle user text");
+          determineTextElement(key, value);
+        }
+      }
+
+      function printButton(key, value, idx) {
+        // console.log(key, value);
+        // console.log(document.querySelector(".buttons-list").children);
+        if (
+          document
+            .querySelector(".buttons-list")
+            .children[0]?.classList.contains("skeleton-loader")
+        ) {
+          document
+            .querySelector(".buttons-list")
+            .removeChild(
+              document
+                .querySelector(".buttons-list")
+                .querySelector(".skeleton-loader")
+            );
+        }
+        let linkBtn = document.createElement("a");
+        linkBtn.setAttribute("href", `https://${value}`);
+        linkBtn.setAttribute("target", "_blank");
+        linkBtn.className = "link-btn";
+        linkBtn.innerHTML = `<p>${key}</p><i class="${icons[idx].icon}"/>`;
+        document.querySelector(".buttons-list").appendChild(linkBtn);
+      }
+
+      function determineTextElement(key, value) {
+        // console.log(key, value);
+
+        switch (key) {
+          case "firstname":
+            printH1Text(key, value);
+            break;
+
+          case "lastname":
+            printH1Text(key, value);
+            break;
+
+          case "city":
+            printLocationText(key, value);
+            break;
+
+          case "country":
+            printLocationText(key, value);
+            break;
+
+          case "quote":
+            document.getElementById(
+              key
+            ).innerHTML = `<p class='quote-text'>"${value}."</p>`;
+            break;
+        }
+
+        // document.getElementById(key).innerHTML = value;
+      }
+
+      function printH1Text(key, value) {
+        //adjust min-height to auto
+
+        document.getElementById(key).closest(".username-div").style.minWidth =
+          "auto";
+        //populate element
+
+        document.getElementById(
+          key
+        ).innerHTML = `<h1 class="username-text">${value}</h1>`;
+      }
+
+      function printLocationText(key, value) {
+        //adjust min-height to auto
+        document.getElementById(key).closest(".location-div").style.minWidth =
+          "auto";
+        let strValue = key == "city" ? `${value},` : value;
+        //populate element
+        document.getElementById(
+          key
+        ).innerHTML = `<p class="location-text">${strValue}</p>`;
+      }
+    </script>
+  </body>
+</html>

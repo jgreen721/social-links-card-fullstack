@@ -1,0 +1,18 @@
+{
+    "user":{
+        "firstname":"jessica",
+        "lastname":"randall"
+    },
+    "location":{
+    "city":"London",
+    "country":"United Kingdom"
+    },
+    "quote":"Front-end developer and avid reader",
+    "links":[
+        {"id":1,"name":"Github","link":"https://github.com/jgreen721"},
+        {"id":2,"name":"Frontend Mentor","link":"https://www.frontendmentor.io/profile/jgreen721"},
+        {"id":3,"name":"CodePen","link":"https://codepen.io/jgreen721"},
+        {"id":4,"name":"Portfolio","link":"https://jgreen721dev.com"},
+        {"id":5,"name":"Instagram","link":"https://instagram.com/jgreen721"}
+    ]
+}
