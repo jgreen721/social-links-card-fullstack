@@ -11,6 +11,7 @@ html {
 :root {
   --green: hsl(75, 94%, 57%);
   --white: hsl(0, 0%, 100%);
+  --bgBlack: rgb(10, 10, 5);
   --lightgrey: hsl(0, 0%, 20%);
   --mediumgrey: hsl(0, 0%, 12%);
   --grey: hsl(0, 0%, 8%);
@@ -35,12 +36,12 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 5px solid black;
-  background: black;
+  background: var(--bgBlack);
   margin: 0 auto;
   position: relative;
   overflow: hidden;
   font-family: var(--mainFont);
+  /* border: 5px solid black; */
 }
 
 .app::after {
@@ -85,11 +86,10 @@ a {
 }
 
 .social-media-card {
-  /* min-height: 550px; */
   position: relative;
   z-index: 10;
-  /* border: 3px solid red; */
   width: clamp(35%, 400px, 85%);
+  /* border: 3px solid red; */
   /* background: var(--mediumgrey); */
 }
 
@@ -103,27 +103,76 @@ a {
   flex-direction: column;
   align-items: center;
   padding: 3.5rem;
+  box-shadow: 2px 2px 15px rgba(255, 255, 255, 0.5) inset,
+    1px 1px 5px rgba(255, 255, 255, 0.5);
+  /* border: 3px solid red; */
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 20deg;
+  inherits: false;
 }
 
 .user-profile-img-div {
-  height: 8rem;
-  width: 8rem;
+  height: 8.5rem;
+  width: 8.5rem;
   border-radius: 50%;
   position: relative;
-  background: white;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profile-img {
-  height: 100%;
-  width: 100%;
+  height: 8rem;
+  width: 8rem;
   border-radius: 50%;
+  animation: spinintro 2s forwards;
+  position: relative;
+  z-index: 10;
+}
+
+.glow-img {
+  background: conic-gradient(
+    from var(--angle),
+    var(--mediumgrey) 70%,
+    var(--green)
+  );
+  /* transform: scale(0); */
+  animation: glow 3.5s ease-in infinite;
+}
+
+@keyframes glow {
+  from {
+    --angle: 0deg;
+  }
+  to {
+    --angle: 360deg;
+  }
+}
+
+.percent-h4 {
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes spinintro {
+  0% {
+    transform: scale(0) rotate(1080deg);
+    filter: blur(10px);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: blur(0px);
+  }
 }
 
 .username-location-container {
   /* margin: 1rem 0; */
   /* border: 2px solid red; */
-  margin-top: 1rem;
+  margin: 1rem 0rem;
 }
 
 .skeleton-loader {
@@ -132,6 +181,7 @@ a {
   width: 400%;
   background: linear-gradient(to right, lightgray, gray, darkgray);
   animation: skeletonloader 2.5s infinite;
+  z-index: 10;
 }
 
 @keyframes skeletonloader {
@@ -166,7 +216,7 @@ a {
 
 .username-div {
   min-width: 115px;
-  height: 35px;
+  height: 30px;
   /* border: 3px solid red; */
   position: relative;
   overflow: hidden;
@@ -174,7 +224,7 @@ a {
 }
 
 .location-div {
-  height: 30px;
+  height: 22.5px;
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
@@ -195,12 +245,14 @@ a {
 } */
 
 .quote-div {
-  width: 345px;
+  min-width: 285px;
+  /* border: 3px solid yellow; */
   height: 25px;
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem;
-  margin: 0.5rem;
+  margin: 0 auto;
+  /* text-align: center; */
 }
 
 .username-text {
@@ -225,17 +277,29 @@ a {
   text-align: center;
 }
 
-.buttons-list {
+.quote-buttons-content {
+  margin-top: 2rem;
+  /* border: 2px solid red; */
+  flex-grow: 1;
+  flex-direction: column;
+  display: flex;
+  gap: 1.5rem;
   width: 100%;
-  min-height: 200px;
+}
+
+.buttons-list {
   position: relative;
   overflow: hidden;
-  margin-top: 2rem;
   border-radius: 0.25rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
 }
 
 .link-btn {
-  width: 100%;
   padding: 1rem;
   background: var(--lightgrey);
   color: var(--white);
@@ -243,7 +307,6 @@ a {
   position: relative;
   display: block;
   text-align: center;
-  margin: 0.5em;
   border: 0;
   font-weight: 500;
   border-radius: 0.5rem;
@@ -251,6 +314,15 @@ a {
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  flex: 1;
+  max-height: 50px;
+  transition: 0.25s ease;
+}
+
+.link-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 2px -4px 10px var(--mediumgrey);
+  text-shadow: 1px 1px 5px white;
 }
 
 .link-btn i {

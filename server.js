@@ -22,6 +22,7 @@ io.on("connection", (socket) => {
       highWaterMark: 350,
     });
     let imageSize = fs.statSync("./assets/avatar-jessica.jpeg").size;
+
     sendClientData(readStream, socket);
     sendImageData(imageStream, socket, imageSize);
   });

@@ -23,6 +23,7 @@
         <div class="social-media-main-content">
           <div class="user-profile-img-div">
             <div class="profile-img-skeleton-loader skeleton-loader"></div>
+            <h4 class="percent-h4" id="percent"></h4>
           </div>
 
           <div class="username-location-container">
@@ -46,11 +47,13 @@
             </div>
           </div>
           <!-- QUOTE -->
-          <div id="quote" class="quote-div">
-            <div class="quote-skeleton-loader skeleton-loader"></div>
-          </div>
-          <div class="buttons-list">
-            <div class="skeleton-loader"></div>
+          <div class="quote-buttons-content">
+            <div id="quote" class="quote-div">
+              <div class="quote-skeleton-loader skeleton-loader"></div>
+            </div>
+            <div class="buttons-list">
+              <div class="skeleton-loader"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -65,7 +68,8 @@
         { id: 5, name: "instagram", icon: "fab fa-instagram" },
       ];
       let socket = io();
-      let FILE_SIZE = 0;
+      let FILE_SIZE;
+      let percentEl = document.getElementById("percent");
 
       setTimeout(() => socket.emit("client-data"), 2500);
 
@@ -76,31 +80,34 @@
 
       let imgChunks = [];
       let flatBytes;
-      // let byteCounter = 0;
+      let bytesTransmitted = 0;
       socket.on("img-data", ({ chunks, len }) => {
         // console.log(chunks);
         chunks = new Int8Array(chunks);
-        // byteCounter += chunks.length;
+        bytesTransmitted += chunks.byteLength;
+        console.log("ChunksByteLength", bytesTransmitted);
         imgChunks.push(chunks);
-        flatBytes = new Int8Array(FILE_SIZE);
-        let offset = 0;
-        imgChunks.forEach((chunk) => {
-          flatBytes.set(chunk, offset);
-          offset += chunk.length;
-        });
-
-        if (offset == FILE_SIZE) {
+        if (bytesTransmitted == FILE_SIZE) {
+          flatBytes = new Int8Array(FILE_SIZE);
+          let offset = 0;
+          imgChunks.forEach((chunk) => {
+            flatBytes.set(chunk, offset);
+            offset += chunk.length;
+          });
           console.log("file has successfully transmitted");
-          handleCreateImage(flatBytes);
+          if (offset == FILE_SIZE) {
+            handleCreateImage(flatBytes);
+          }
+        } else {
+          handleProgress(bytesTransmitted);
         }
-
-        // imgChunks.push(chunks);
-        // byteCounter += len;
-        // console.log(byteCounter, FILE_SIZE);
-        // if (byteCounter == FILE_SIZE) {
-        //   flattenBytes(imgChunks);
-        // }
       });
+
+      function handleProgress(bytesTransmitted) {
+        let percent = Math.floor((bytesTransmitted / FILE_SIZE) * 100);
+        console.log("Percent", percent);
+        percentEl.innerHTML = `${percent}%`;
+      }
 
       function handleCreateImage(int8Data) {
         let blob = new Blob([int8Data], { type: "imgage/jpeg" });
@@ -112,15 +119,12 @@
         console.log("handlecreate image!");
         document.querySelector(".user-profile-img-div").innerHTML = "";
         document.querySelector(".user-profile-img-div").appendChild(img);
+        setTimeout(() => {
+          document
+            .querySelector(".user-profile-img-div")
+            .classList.add("glow-img");
+        }, 2000);
       }
-
-      // function flattenBytes(imgChunks) {
-      //   console.log("FlattenBYTES - imgChunks", imgChunks);
-      //   Array.from(imgChunks).forEach((chunkBuffer) => {
-      //     console.log(chunkBuffer.length);
-      //   });
-      //   console.log(flatBytes);
-      // }
 
       socket.on("data", (payload) => {
         handleRender(payload);
@@ -185,6 +189,8 @@
             break;
 
           case "quote":
+            document.querySelector(".quote-div").style.minWidth = "0";
+            document.querySelector(".quote-div").style.height = "auto";
             document.getElementById(
               key
             ).innerHTML = `<p class='quote-text'>"${value}."</p>`;
